@@ -125,28 +125,30 @@ export default function Home() {
           <Title>countdown</Title>
           {countdowns?.length > 0 ? (
             <ul className='divide-cb-dusty-blue flex flex-col divide-y'>
-              {countdowns.map((countdown, index) => (
-                <li key={index} className='py-4 first:pt-0 last:pb-0'>
-                  <div className='flex justify-between'>
-                    <div>
+              {countdowns
+                .sort((a, b) => (a.date < b.date ? -1 : 1))
+                .map((countdown, index) => (
+                  <li key={index} className='py-4 first:pt-0 last:pb-0'>
+                    <div className='flex justify-between'>
                       <div>
-                        {countdown.name} -{' '}
-                        {format(countdown.date, 'MMM d, yyyy')}
+                        <div>
+                          {countdown.name} -{' '}
+                          {format(countdown.date, 'MMM d, yyyy')}
+                        </div>
+                        <DaysLeft date={countdown.date} />
                       </div>
-                      <DaysLeft date={countdown.date} />
+                      <button
+                        type='button'
+                        onClick={() => {
+                          setSelectedCountdownIndex(index)
+                          setIsConfirmModalOpen(true)
+                        }}
+                      >
+                        <TrashIcon className='h-6 w-6 text-red-700' />
+                      </button>
                     </div>
-                    <button
-                      type='button'
-                      onClick={() => {
-                        setSelectedCountdownIndex(index)
-                        setIsConfirmModalOpen(true)
-                      }}
-                    >
-                      <TrashIcon className='h-6 w-6 text-red-700' />
-                    </button>
-                  </div>
-                </li>
-              ))}
+                  </li>
+                ))}
             </ul>
           ) : (
             <p>no countdowns</p>
