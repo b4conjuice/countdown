@@ -1,0 +1,8 @@
+{
+  "name": "countdown",
+  "short_name": "cd",
+  "lang": "en-US",
+  "start_url": "/",
+  "display": "standalone",
+  "scope": "/"
+}
