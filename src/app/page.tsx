@@ -142,7 +142,7 @@ export default function Home() {
     number | null
   >(null)
   const [pastCountdowns, futureOrPresentCountdowns] = partition(
-    countdowns,
+    countdowns ?? [],
     countdown => isPast(countdown.date)
   )
   return (
