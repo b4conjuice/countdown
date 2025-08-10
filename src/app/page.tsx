@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Cog6ToothIcon, PlusIcon, TrashIcon } from '@heroicons/react/20/solid'
 import {
   differenceInDays,
@@ -8,13 +9,27 @@ import {
   format,
   formatDuration,
   intervalToDuration,
+  isPast,
 } from 'date-fns'
 
 import { Main, Title } from '@/components/ui'
 import useLocalStorage from '@/lib/useLocalStorage'
-import { useState } from 'react'
 import Modal from '@/components/modal'
 import Button from '@/components/button'
+
+function partition<T>(array: T[], predicate: (item: T) => boolean): [T[], T[]] {
+  return array.reduce(
+    (acc: [T[], T[]], item: T) => {
+      if (predicate(item)) {
+        acc[0].push(item) // Add to the 'truthy' array
+      } else {
+        acc[1].push(item) // Add to the 'falsy' array
+      }
+      return acc
+    },
+    [[], []] // Initialize with two empty arrays of type T[]
+  )
+}
 
 type Countdown = {
   name: string
@@ -82,6 +97,14 @@ function DaysLeft({ date }: { date: Date }) {
   const differencesHoursRounded = Math.ceil(
     differenceInHours(date, new Date()) / 24
   )
+  if (differencesHoursRounded < 0) {
+    return (
+      <div>
+        {Math.abs(differencesHoursRounded)} day
+        {differencesHoursRounded === 1 ? '' : 's'} ago
+      </div>
+    )
+  }
   return (
     <>
       {/* <div>
@@ -118,14 +141,19 @@ export default function Home() {
   const [selectedCountdownIndex, setSelectedCountdownIndex] = useState<
     number | null
   >(null)
+  const [pastCountdowns, futureOrPresentCountdowns] = partition(
+    countdowns,
+    countdown => isPast(countdown.date)
+  )
   return (
     <>
       <Main className='flex flex-col p-4'>
         <div className='flex flex-grow flex-col space-y-4'>
           <Title>countdown</Title>
-          {countdowns?.length > 0 ? (
+          <h2 className='text-cb-orange'>upcoming</h2>
+          {futureOrPresentCountdowns?.length > 0 ? (
             <ul className='divide-cb-dusty-blue flex flex-col divide-y'>
-              {countdowns
+              {futureOrPresentCountdowns
                 .sort((a, b) => (a.date < b.date ? -1 : 1))
                 .map((countdown, index) => (
                   <li key={index} className='py-4 first:pt-0 last:pb-0'>
@@ -151,7 +179,38 @@ export default function Home() {
                 ))}
             </ul>
           ) : (
-            <p>no countdowns</p>
+            <p>no upcoming countdowns</p>
+          )}
+          <h2 className='text-cb-orange'>past</h2>
+          {pastCountdowns?.length > 0 ? (
+            <ul className='divide-cb-dusty-blue text-cb-white/50 flex flex-col divide-y'>
+              {pastCountdowns
+                .sort((a, b) => (a.date < b.date ? -1 : 1))
+                .map((countdown, index) => (
+                  <li key={index} className='py-4 first:pt-0 last:pb-0'>
+                    <div className='flex justify-between'>
+                      <div>
+                        <div>
+                          {countdown.name} -{' '}
+                          {format(countdown.date, 'MMM d, yyyy')}
+                        </div>
+                        <DaysLeft date={countdown.date} />
+                      </div>
+                      <button
+                        type='button'
+                        onClick={() => {
+                          setSelectedCountdownIndex(index)
+                          setIsConfirmModalOpen(true)
+                        }}
+                      >
+                        <TrashIcon className='h-6 w-6 text-red-700' />
+                      </button>
+                    </div>
+                  </li>
+                ))}
+            </ul>
+          ) : (
+            <p>no past countdowns</p>
           )}
         </div>
       </Main>
