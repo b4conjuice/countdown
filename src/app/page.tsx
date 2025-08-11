@@ -127,20 +127,22 @@ export default function Home() {
     'cd-countdowns',
     []
   )
-  const addCountdown = (countdown: Countdown) => {
-    setCountdowns([...countdowns, countdown])
-    setIsAddModalOpen(false)
-  }
-  const deleteCountdown = (index: number) => {
-    const countdownsCopy = [...countdowns]
-    countdownsCopy.splice(index, 1)
-    setCountdowns(countdownsCopy)
-  }
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
   const [selectedCountdownIndex, setSelectedCountdownIndex] = useState<
     number | null
   >(null)
+  const addCountdown = (countdown: Countdown) => {
+    const newCountdowns = [...(countdowns ?? [])]
+    newCountdowns.push(countdown)
+    setCountdowns(newCountdowns)
+    setIsAddModalOpen(false)
+  }
+  const deleteCountdown = (index: number) => {
+    const newCountdowns = [...(countdowns ?? [])]
+    newCountdowns.splice(index, 1)
+    setCountdowns(newCountdowns)
+  }
   const [pastCountdowns, futureOrPresentCountdowns] = partition(
     countdowns ?? [],
     countdown => isPast(countdown.date)
