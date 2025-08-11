@@ -129,8 +129,8 @@ export default function Home() {
   )
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
-  const [selectedCountdownIndex, setSelectedCountdownIndex] = useState<
-    number | null
+  const [selectedCountdownName, setSelectedCountdownName] = useState<
+    string | null
   >(null)
   const addCountdown = (countdown: Countdown) => {
     const newCountdowns = [...(countdowns ?? [])]
@@ -138,7 +138,8 @@ export default function Home() {
     setCountdowns(newCountdowns)
     setIsAddModalOpen(false)
   }
-  const deleteCountdown = (index: number) => {
+  const deleteCountdown = (name: string) => {
+    const index = countdowns?.findIndex(countdown => countdown.name === name)
     const newCountdowns = [...(countdowns ?? [])]
     newCountdowns.splice(index, 1)
     setCountdowns(newCountdowns)
@@ -170,7 +171,7 @@ export default function Home() {
                       <button
                         type='button'
                         onClick={() => {
-                          setSelectedCountdownIndex(index)
+                          setSelectedCountdownName(countdown.name)
                           setIsConfirmModalOpen(true)
                         }}
                       >
@@ -201,7 +202,7 @@ export default function Home() {
                       <button
                         type='button'
                         onClick={() => {
-                          setSelectedCountdownIndex(index)
+                          setSelectedCountdownName(countdown.name)
                           setIsConfirmModalOpen(true)
                         }}
                       >
@@ -247,7 +248,7 @@ export default function Home() {
       >
         <AddCountdown addCountdown={addCountdown} />
       </Modal>
-      {selectedCountdownIndex !== null && (
+      {selectedCountdownName !== null && (
         <Modal
           isOpen={isConfirmModalOpen}
           setIsOpen={setIsConfirmModalOpen}
@@ -256,7 +257,7 @@ export default function Home() {
           <div className='flex space-x-4'>
             <Button
               onClick={() => {
-                deleteCountdown(selectedCountdownIndex)
+                deleteCountdown(selectedCountdownName)
                 setIsConfirmModalOpen(false)
               }}
             >
