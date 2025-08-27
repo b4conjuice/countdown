@@ -1,7 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { Cog6ToothIcon, PlusIcon, TrashIcon } from '@heroicons/react/20/solid'
+import {
+  Cog6ToothIcon,
+  PencilSquareIcon,
+  PlusIcon,
+  TrashIcon,
+} from '@heroicons/react/20/solid'
 import {
   differenceInDays,
   differenceInHours,
@@ -36,14 +41,20 @@ type Countdown = {
   date: Date
 }
 
-function AddCountdown({
-  addCountdown,
+function CountdownForm({
+  submit,
+  countdown,
 }: {
-  addCountdown: (countdown: Countdown) => void
+  submit: (countdown: Countdown) => void
+  countdown?: Countdown
 }) {
   const today = new Date()
-  const [name, setName] = useState('')
-  const [date, setDate] = useState(format(today, 'yyyy-MM-dd'))
+  const [name, setName] = useState(countdown?.name ?? '')
+  const [date, setDate] = useState(
+    countdown
+      ? format(countdown.date, 'yyyy-MM-dd')
+      : format(today, 'yyyy-MM-dd')
+  )
   return (
     <div className='flex flex-col space-y-4'>
       <input
@@ -67,14 +78,14 @@ function AddCountdown({
         onClick={() => {
           const [year, month, day] = date.split('-')
           const newDate = new Date(Number(year), Number(month) - 1, Number(day))
-          addCountdown({ name, date: newDate })
+          submit({ name, date: newDate })
           setName('')
           setDate('')
         }}
         disabled={!name || !date}
         className='disabled:pointer-events-none disabled:opacity-50'
       >
-        add
+        {countdown ? 'update' : 'add'}
       </Button>
     </div>
   )
@@ -128,6 +139,7 @@ export default function Home() {
     []
   )
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
   const [selectedCountdownName, setSelectedCountdownName] = useState<
     string | null
@@ -137,6 +149,15 @@ export default function Home() {
     newCountdowns.push(countdown)
     setCountdowns(newCountdowns)
     setIsAddModalOpen(false)
+  }
+  const editCountdown = (countdown: Countdown) => {
+    const newCountdowns = [...(countdowns ?? [])]
+    const index = newCountdowns.findIndex(
+      countdown => countdown.name === selectedCountdownName
+    )
+    newCountdowns[index] = countdown
+    setCountdowns(newCountdowns)
+    setIsEditModalOpen(false)
   }
   const deleteCountdown = (name: string) => {
     const index = countdowns?.findIndex(countdown => countdown.name === name)
@@ -168,15 +189,27 @@ export default function Home() {
                         </div>
                         <DaysLeft date={countdown.date} />
                       </div>
-                      <button
-                        type='button'
-                        onClick={() => {
-                          setSelectedCountdownName(countdown.name)
-                          setIsConfirmModalOpen(true)
-                        }}
-                      >
-                        <TrashIcon className='h-6 w-6 text-red-700' />
-                      </button>
+                      <div className='flex space-x-4'>
+                        <button
+                          className='text-cb-yellow hover:text-cb-yellow/75'
+                          type='button'
+                          onClick={() => {
+                            setSelectedCountdownName(countdown.name)
+                            setIsEditModalOpen(true)
+                          }}
+                        >
+                          <PencilSquareIcon className='h-6 w-6' />
+                        </button>
+                        <button
+                          type='button'
+                          onClick={() => {
+                            setSelectedCountdownName(countdown.name)
+                            setIsConfirmModalOpen(true)
+                          }}
+                        >
+                          <TrashIcon className='h-6 w-6 text-red-700' />
+                        </button>
+                      </div>
                     </div>
                   </li>
                 ))}
@@ -199,15 +232,27 @@ export default function Home() {
                         </div>
                         <DaysLeft date={countdown.date} />
                       </div>
-                      <button
-                        type='button'
-                        onClick={() => {
-                          setSelectedCountdownName(countdown.name)
-                          setIsConfirmModalOpen(true)
-                        }}
-                      >
-                        <TrashIcon className='h-6 w-6 text-red-700' />
-                      </button>
+                      <div className='flex space-x-4'>
+                        <button
+                          className='text-cb-yellow hover:text-cb-yellow/75'
+                          type='button'
+                          onClick={() => {
+                            setSelectedCountdownName(countdown.name)
+                            setIsEditModalOpen(true)
+                          }}
+                        >
+                          <PencilSquareIcon className='h-6 w-6' />
+                        </button>
+                        <button
+                          type='button'
+                          onClick={() => {
+                            setSelectedCountdownName(countdown.name)
+                            setIsConfirmModalOpen(true)
+                          }}
+                        >
+                          <TrashIcon className='h-6 w-6 text-red-700' />
+                        </button>
+                      </div>
                     </div>
                   </li>
                 ))}
@@ -246,7 +291,17 @@ export default function Home() {
         setIsOpen={setIsAddModalOpen}
         title='add new countdown'
       >
-        <AddCountdown addCountdown={addCountdown} />
+        <CountdownForm submit={addCountdown} />
+      </Modal>
+      <Modal
+        isOpen={isEditModalOpen}
+        setIsOpen={setIsEditModalOpen}
+        title='edit countdown'
+      >
+        <CountdownForm
+          submit={editCountdown}
+          countdown={countdowns?.find(c => c.name === selectedCountdownName)}
+        />
       </Modal>
       {selectedCountdownName !== null && (
         <Modal
